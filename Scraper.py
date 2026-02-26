@@ -1,20 +1,36 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
 
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+#scrape from 0-10 of the bestseller and toprated sephora womens perfumes
 
-options = webdriver.ChromeOptions()
-options.add_argument("--start-maximized")
+#needed functionality:
+#load reviews from bestsellers url list bestsellers[x]
+#append reviews
+#continue loading and appending reviews till reaches 500 reviews for the product
+#give some kind of success completion message for that product (url)
+#load reviews from toprated list url list toprated[x]
+#append reviews
+#continue loading and appending reviews till reaches 500 reviews for the product
+#append all reviews with category (list name) and their respective source urls (list name[x ])
+#some kind of success message for completion of that product url
+#increment x annd continue going through 
+#convert all reviews to csv
 
-driver = webdriver.Chrome(
-    service=Service(ChromeDriverManager().install()),
-    options=options
-)
+import requests
+import pandas as pd
+import time
+import re
 
-#controls
+# ---------------- CONFIG ---------------- #
+
+MAX_REVIEWS_PER_PRODUCT = 500
+PAGE_LIMIT = 100   # max allowed by BV is usually 100
+SLEEP_BETWEEN_REQUESTS = 0.5
+
+BAZAARVOICE_ENDPOINT = "https://api.bazaarvoice.com/data/reviews.json"
+
+PASSKEY = "calXm2DyQVjcCy9agq85vmTJv5ELuuBCF2sdg4BnJzJus"
+
+# ---------------- URL LISTS ---------------- #
+
 bestsellers = ["https://www.sephora.com/product/libre-berry-crush-P520837?skuId=2919744&icid2=products%20grid:p520837:product",
                "https://www.sephora.com/product/kayali-yum-boujee-marshmallow-81-eau-de-parfum-intense-travel-spray-P512449?skuId=2804839&icid2=products%20grid:p512449:product",
                "https://www.sephora.com/product/kayali-vanilla-P439406?skuId=2163970&icid2=products%20grid:p439406:product",
@@ -45,335 +61,84 @@ categories = {
     "toprated": toprated
 }
 
+# ---------------- HELPERS ---------------- #
+
+def extract_product_id(url):
+    """Extracts PXXXXX from Sephora URL"""
+    match = re.search(r"(P\d+)", url)
+    return match.group(1) if match else None
+
+
+def fetch_reviews(product_id, offset):
+    params = {
+        "Filter": f"ProductId:{product_id}",
+        "Sort": "SubmissionTime:desc",
+        "Limit": PAGE_LIMIT,
+        "Offset": offset,
+        "Include": "Products,Comments",
+        "Stats": "Reviews",
+        "passkey": PASSKEY,
+        "apiversion": "5.4",
+        "Locale": "en_US"
+    }
+
+    response = requests.get(BAZAARVOICE_ENDPOINT, params=params)
+    response.raise_for_status()
+    return response.json()
+
+
+# ---------------- MAIN SCRAPER ---------------- #
+
 all_reviews = []
 
-#scroll and load review helper func
-import time
-
-def lazy_scroll(driver, pause=2, steps=4):
-    for _ in range(steps):
-        # Scroll until "Reviews" text is visible
-        driver.execute_script("""
-        const el = Array.from(document.querySelectorAll('*'))
-        .find(e => e.textContent.trim() === 'Reviews');
-        if (el) el.scrollIntoView({behavior: 'smooth', block: 'center'});
-        """)
-        time.sleep(3)
-        # driver.execute_script(
-        #     "window.scrollBy(0, document.body.scrollHeight / arguments[0]);",
-        #     steps
-        # )
-        #time.sleep(pause)
-
-#extract visible reviews func
-from selenium.common.exceptions import NoSuchElementException
-
-def extract_reviews(driver, category, url, collected, limit=500):
-    # reviews = driver.find_elements(By.CSS_SELECTOR, "div[data-comp*='Review ']")
-
-    reviews = driver.find_elements(
-    By.XPATH,
-    "//div[@data-comp='Review Review BaseComponent ']"
-)
-    print("Reviews found:", len(reviews))
-
-    for r in reviews:
-        try:
-            text = r.find_element(
-                By.XPATH,
-                ".//div[string-length(normalize-space(text())) > 20]"
-            ).text
-
-            rating = r.find_element(
-                By.XPATH,
-                ".//span[contains(@aria-label,'stars')]"
-            ).get_attribute("aria-label")
-
-            author = r.find_element(
-                By.XPATH,
-                ".//a[@data-at='nickname']"
-            ).text
-
-            collected.append({
-                "category": category,
-                "source_url": url,
-                "rating": rating,
-                "review_text": text,
-                "author": author
-            })
-
-        except:
-            continue
-    # for r in reviews:
-    #     if len(collected) >= limit:
-    #         return collected
-
-    #     try:
-    #         text_el = r.find_elements(By.CSS_SELECTOR, "div.css-2482tk")
-    #         if not text_el:
-    #             continue
-
-    #         review_text = text_el[0].text.strip()
-
-    #         rating = r.find_element(By.CSS_SELECTOR, "span[aria-label*='stars']").get_attribute("aria-label")
-    #         author = r.find_element(By.CSS_SELECTOR, "a[data-at='nickname']").text
-
-    #         collected.append({
-    #             "category": category,
-    #             "source_url": url,
-    #             "rating": rating,
-    #             "review_text": review_text,
-    #             "author": author
-    #         })
-
-    #     except NoSuchElementException:
-    #         continue
-
-    # return collected
-
-#scraping driver func
-MAX_REVIEWS_PER_CATEGORY = 500
-
 for category, urls in categories.items():
-    print(f"\nStarting category: {category}")
+    print(f"\n🔹 Starting category: {category}")
 
-    category_reviews = 0   # y reset per category
+    for idx, url in enumerate(urls):
+        print(f"\n  ▶ Loading product {idx + 1}/{len(urls)}")
+        print(f"    URL: {url}")
 
-    for x, url in enumerate(urls):
-        if category_reviews >= MAX_REVIEWS_PER_CATEGORY:
-            break
-
-        print(f"  Loading product {x+1}/{len(urls)}")
-
-        driver.get(url)
-        from selenium.webdriver.common.by import By
-        time.sleep(2)
-
-        iframes = driver.find_elements(By.TAG_NAME, "iframe")
-        print(f"Found {len(iframes)} iframes")
-
-        review_iframe = None
-
-        for i, iframe in enumerate(iframes):
-            try:
-                driver.switch_to.frame(iframe)
-                if "Recommended" in driver.page_source or "Reviews" in driver.page_source:
-                    review_iframe = iframe
-                    print(f"✅ Reviews iframe found at index {i}")
-                    driver.switch_to.frame(review_iframe)
-
-                    prev_count = 0
-
-                    while category_reviews < MAX_REVIEWS_PER_CATEGORY:
-                        reviews = driver.find_elements(
-                            By.XPATH,
-                            "//div[@data-comp='Review Review BaseComponent ']"
-                        )
-
-                        print("Reviews found:", len(reviews))
-
-                        if len(reviews) == prev_count:
-                            break
-
-                        prev_count = len(reviews)
-
-                        extract_reviews(
-                            driver,
-                            category,
-                            url,
-                            all_reviews,
-                            limit=MAX_REVIEWS_PER_CATEGORY
-                        )
-
-                        category_reviews = sum(
-                            1 for r in all_reviews if r["category"] == category
-                        )
-
-                        driver.execute_script(
-                            "window.scrollTo(0, document.body.scrollHeight);"
-                        )
-                        time.sleep(2)
-
-                    driver.switch_to.default_content()
-                    break
-                driver.switch_to.default_content()
-            except:
-                driver.switch_to.default_content()
-
-        if not review_iframe:
-            print("❌ No review iframe found, skipping product")
+        product_id = extract_product_id(url)
+        if not product_id:
+            print("    ❌ Could not extract ProductId, skipping")
             continue
-        # iframes = driver.find_elements(By.TAG_NAME, "iframe")
-        # print("IFRAMES FOUND:", len(iframes))
-        #time.sleep(3)
 
-    # prev_count = 0
+        offset = 0
+        product_review_count = 0
 
-    # while len(all_reviews) < 500:
-    #     reviews = driver.find_elements(
-    #         By.XPATH,
-    #         "//div[@data-comp='Review Review BaseComponent ']"
-    #     )
+        while product_review_count < MAX_REVIEWS_PER_PRODUCT:
+            data = fetch_reviews(product_id, offset)
+            reviews = data.get("Results", [])
 
-    #     if len(reviews) == prev_count:
-    #         break
+            if not reviews:
+                break
 
-    #     prev_count = len(reviews)
+            for r in reviews:
+                all_reviews.append({
+                    "category": category,
+                    "source_url": url,
+                    "product_id": product_id,
+                    "rating": r.get("Rating"),
+                    "review_text": r.get("ReviewText"),
+                    "title": r.get("Title"),
+                    "author": r.get("UserNickname"),
+                    "submission_time": r.get("SubmissionTime")
+                })
 
-    #     for r in reviews:
-    #         try:
-    #             text = r.find_element(
-    #                 By.XPATH,
-    #                 ".//div[string-length(normalize-space(text())) > 20]"
-    #             ).text
+                product_review_count += 1
+                if product_review_count >= MAX_REVIEWS_PER_PRODUCT:
+                    break
 
-    #             rating = r.find_element(
-    #                 By.XPATH,
-    #                 ".//span[contains(@aria-label,'stars')]"
-    #             ).get_attribute("aria-label")
+            offset += PAGE_LIMIT
+            time.sleep(SLEEP_BETWEEN_REQUESTS)
 
-    #             author = r.find_element(
-    #                 By.XPATH,
-    #                 ".//a[@data-at='nickname']"
-    #             ).text
+        print(f"    ✅ Finished product with {product_review_count} reviews")
 
-    #             all_reviews.append({
-    #                 "category": category,
-    #                 "source_url": url,
-    #                 "rating": rating,
-    #                 "review_text": text,
-    #                 "author": author
-    #             })
+print("\n🎉 SCRAPING COMPLETE")
 
-    #         except:
-    #             continue
-
-        # scroll INSIDE iframe
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)
-
-        driver.switch_to.default_content()
-
-        # previous_count = -1
-
-        # while category_reviews < MAX_REVIEWS_PER_CATEGORY:
-        #     lazy_scroll(driver)
-
-        #     before = len(all_reviews)
-
-        #     extract_reviews(
-        #         driver,
-        #         category,
-        #         url,
-        #         all_reviews,
-        #         limit=MAX_REVIEWS_PER_CATEGORY
-        #     )
-
-        #     after = len(all_reviews)
-        #     category_reviews = sum(1 for r in all_reviews if r["category"] == category)
-
-        #     if after == before or after == previous_count:
-        #         break  # no new reviews loading
-
-        #     previous_count = after
-
-        print(f"    Collected {category_reviews} reviews so far")
-
-    print(f"SUCCESS: Finished {category} with {category_reviews} reviews")
-
-#export to one spreadsheet
-import pandas as pd
+# ---------------- EXPORT ---------------- #
 
 df = pd.DataFrame(all_reviews)
 df.to_csv("sephora_reviews.csv", index=False)
 
-print(f"\nSaved {len(df)} total reviews to sephora_reviews.csv")
-
-
-
-#scrape from 0-10 of the bestseller and toprated
-#create a 
-
-
-#needed functionality:
-#load reviews from bestsellers
-#append reviews
-#continue loading and appending till reaches 500 (maybe need y indec)
-#some kind of success message mb
-#reset y if there's y
-#load reviews from toprated
-#append reviews
-#continue till reaches 500 
-#append all reviews with category (list) and their respective source urls (x index)
-#some kind of success message mb
-#increment x and reset y
-#convert all reviews to csv
-
-# for x in range(10):
-#     url = bestsellers[x]
-
-#     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-#     wait = WebDriverWait(driver, 10)
-
-#     #wait till a review is present
-#     #wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-comp='Review']"))) #generic
-#     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-comp*='Review Review BaseComponent ']")))
-
-#     #reviews = driver.find_elements(By.CSS_SELECTOR, "div[data-comp='Review']") #generic
-#     reviews = driver.find_elements(By.CSS_SELECTOR, "div[data-comp='Review Review BaseComponent ']")
-#     #print(f"Found {len(reviews)} reviews")
-
-#     data = []
-
-#     for review in reviews:
-#         try:
-#             # Review text
-#             text = review.find_element(By.CSS_SELECTOR, "div.css-2482tk").text
-        
-#             # Rating (convert "5 stars" → 5)
-#             rating_str = review.find_element(By.CSS_SELECTOR, "span[aria-label*='stars']").get_attribute("aria-label")
-#             rating = int(rating_str.split()[0])
-        
-#             # Author
-#             author = review.find_element(By.CSS_SELECTOR, "a[data-at='nickname']").text
-        
-#             data.append({
-#                 "author": author,
-#                 "rating": rating,
-#                 "review_text": text
-#         })
-        
-#         except Exception as e:
-#             print("Skipped one review:", e)
-
-
-#     while len(data) < 500:
-#         try:
-#             load_more = driver.find_element(By.XPATH, "//button[contains(text(),'Load More')]")
-#             load_more.click()
-#             time.sleep(2)
-
-#             reviews = driver.find_elements(By.CSS_SELECTOR, "div[data-comp='Review ']")
-#             print("Total reviews:", len(reviews))
-#         except:
-#             break
-
-# for category, urls in {
-#     "bestsellers": bestselling,
-#     "toprated": toprate
-# }.items():
-
-#     for url in urls:
-#         driver.get(url)
-
-#         # load reviews (scroll logic)
-#         # find review elements
-
-#         for review in reviews:
-#             all_reviews.append({
-#                 "category": category,
-#                 "rating": rating,
-#                 "review_text": text,
-#                 "author": author,
-#                 "source_url": url
-#             })
+print(f"💾 Saved {len(df)} total reviews to sephora_reviews.csv")
