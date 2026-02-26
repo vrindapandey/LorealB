@@ -1,0 +1,6 @@
+1. Scrape Top 10 female perfumes- 500 each
+automate to scrape top 10 from bestselling then 10 from toprated
+2. compare bestselling vs toprated insights
+bestselling- marketing, merchandising and psychological indicators
+toprated- quality and quality indicators
+3. formulate a plan for a technologically innovative launch pased off insights
