@@ -114,7 +114,7 @@ for idx, url in enumerate(urls):
 
         for r in reviews:
             all_reviews.append({
-                #"source_url": url,
+                "source_url": url,
                 "product_id": product_id,
                 "rating": r.get("Rating"),
                 "review_text": r.get("ReviewText"),

@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Load CSV
-df = pd.read_csv("your_file.csv")
+df = pd.read_csv("sephora_reviews.csv")
 
 # Inspect
 print(df.head())
@@ -12,5 +12,12 @@ df = df[df["category"] == "toprated"] #remove toprated entries
 
 #remove libre travel size
 df = df[df["source_url"] == "https://www.sephora.com/product/libre-berry-crush-travel-spray-P520822?skuId=2919769&icid2=products%20grid:p520822:product"]
+
 df = df.drop(columns=["category"]) #remove category column
+
+productsdf = df[['product_id', 'source_url']].drop_duplicates(subset='product_id') #make every unique product ID one entry 
+productsdf.to_csv("all_products.csv", index=False) #in a new csv all_products with columns product_id, source_url from the csv
+
+#add a brand column 
+#Scrape ingredients and about the product for each unique product
 
