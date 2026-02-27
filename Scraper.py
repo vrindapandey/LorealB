@@ -43,23 +43,23 @@ bestsellers = ["https://www.sephora.com/product/libre-berry-crush-P520837?skuId=
                "https://www.sephora.com/product/good-girl-blush-eau-de-parfum-P504996?skuId=2645026&icid2=products%20grid:p504996:product",
                "https://www.sephora.com/product/glossier-glossier-you-eau-de-parfum-P504364?skuId=2649770&icid2=products%20grid:p504364:product"
                ] #9:20 PM EST Sephora womens frag
-toprated = ["https://www.sephora.com/product/light-blue-eau-de-toilette-travel-spray-P516185?skuId=2863355&icid2=products%20grid:p516185:product",
-            "https://www.sephora.com/product/indecent-cherry-eau-de-parfum-P520182?skuId=2948586&icid2=products%20grid:p520182:product",
-            "https://www.sephora.com/product/mini-l-imperatrice-eau-de-toilette-set-P517211?skuId=2863488&icid2=products%20grid:p517211:product",
-            "https://www.sephora.com/product/mini-flora-gorgeous-gardenia-eau-de-parfum-duo-set-P514862?skuId=2909539&icid2=products%20grid:p514862:product",
-            "https://www.sephora.com/product/eilish-2-eau-de-parfum-travel-spray-P520152?skuId=2948453&icid2=products%20grid:p520152:product",
-            "https://www.sephora.com/product/bloom-ambrosia-doro-eau-de-parfum-travel-spray-P520382?skuId=2931970&icid2=products%20grid:p520382:product",
-            "https://www.sephora.com/product/kilian-good-girl-gone-bad-travel-spray-P479710?skuId=2530459&icid2=products%20grid:p479710:product",
-            "https://www.sephora.com/product/jpg-le-male-elixir-4-22-oz-shower-gel-travel-spray-0-5-oz-P518157?skuId=2907111&icid2=products%20grid:p518157:product",
-            "https://www.sephora.com/product/barenia-eau-de-parfum-set-60ml-15ml-feh25-P518531?skuId=2909414&icid2=products%20grid:p518531:product",
-            "https://www.sephora.com/product/dolce-gabbana-the-one-gold-eau-de-parfum-intense-P513593?skuId=2821114&icid2=products%20grid:p513593:product",
-            "https://www.sephora.com/product/terre-d-hermes-eau-de-parfum-intense-travel-spray-P516659?skuId=2880029&icid2=products%20grid:p516659:product"
-            ] # 9:28 PM EST Sephora womens frag
+# toprated = ["https://www.sephora.com/product/light-blue-eau-de-toilette-travel-spray-P516185?skuId=2863355&icid2=products%20grid:p516185:product",
+#             "https://www.sephora.com/product/indecent-cherry-eau-de-parfum-P520182?skuId=2948586&icid2=products%20grid:p520182:product",
+#             "https://www.sephora.com/product/mini-l-imperatrice-eau-de-toilette-set-P517211?skuId=2863488&icid2=products%20grid:p517211:product",
+#             "https://www.sephora.com/product/mini-flora-gorgeous-gardenia-eau-de-parfum-duo-set-P514862?skuId=2909539&icid2=products%20grid:p514862:product",
+#             "https://www.sephora.com/product/eilish-2-eau-de-parfum-travel-spray-P520152?skuId=2948453&icid2=products%20grid:p520152:product",
+#             "https://www.sephora.com/product/bloom-ambrosia-doro-eau-de-parfum-travel-spray-P520382?skuId=2931970&icid2=products%20grid:p520382:product",
+#             "https://www.sephora.com/product/kilian-good-girl-gone-bad-travel-spray-P479710?skuId=2530459&icid2=products%20grid:p479710:product",
+#             "https://www.sephora.com/product/jpg-le-male-elixir-4-22-oz-shower-gel-travel-spray-0-5-oz-P518157?skuId=2907111&icid2=products%20grid:p518157:product",
+#             "https://www.sephora.com/product/barenia-eau-de-parfum-set-60ml-15ml-feh25-P518531?skuId=2909414&icid2=products%20grid:p518531:product",
+#             "https://www.sephora.com/product/dolce-gabbana-the-one-gold-eau-de-parfum-intense-P513593?skuId=2821114&icid2=products%20grid:p513593:product",
+#             "https://www.sephora.com/product/terre-d-hermes-eau-de-parfum-intense-travel-spray-P516659?skuId=2880029&icid2=products%20grid:p516659:product"
+#             ] # 9:28 PM EST Sephora womens frag
 
-categories = {
-    "bestsellers": bestsellers,
-    "toprated": toprated
-}
+# categories = {
+#     "bestsellers": bestsellers,
+#     "toprated": toprated
+# }
 
 # ---------------- HELPERS ---------------- #
 
@@ -89,50 +89,48 @@ def fetch_reviews(product_id, offset):
 
 # ---------------- MAIN SCRAPER ---------------- #
 
+#add product level to original scraper or change logic structure to just scrape about info
+
 all_reviews = []
 
-for category, urls in categories.items():
-    print(f"\n🔹 Starting category: {category}")
+for idx, url in enumerate(urls):
+    print(f"\n  ▶ Loading product {idx + 1}/{len(urls)}")
+    print(f"    URL: {url}")
 
-    for idx, url in enumerate(urls):
-        print(f"\n  ▶ Loading product {idx + 1}/{len(urls)}")
-        print(f"    URL: {url}")
+    product_id = extract_product_id(url)
+    if not product_id:
+        print("    ❌ Could not extract ProductId, skipping")
+        continue
 
-        product_id = extract_product_id(url)
-        if not product_id:
-            print("    ❌ Could not extract ProductId, skipping")
-            continue
+    offset = 0
+    product_review_count = 0
 
-        offset = 0
-        product_review_count = 0
+    while product_review_count < MAX_REVIEWS_PER_PRODUCT:
+        data = fetch_reviews(product_id, offset)
+        reviews = data.get("Results", [])
 
-        while product_review_count < MAX_REVIEWS_PER_PRODUCT:
-            data = fetch_reviews(product_id, offset)
-            reviews = data.get("Results", [])
+        if not reviews:
+            break
 
-            if not reviews:
+        for r in reviews:
+            all_reviews.append({
+                #"source_url": url,
+                "product_id": product_id,
+                "rating": r.get("Rating"),
+                "review_text": r.get("ReviewText"),
+                "title": r.get("Title"),
+                "author": r.get("UserNickname"),
+                #"submission_time": r.get("SubmissionTime")
+            })
+
+            product_review_count += 1
+            if product_review_count >= MAX_REVIEWS_PER_PRODUCT:
                 break
 
-            for r in reviews:
-                all_reviews.append({
-                    "category": category,
-                    "source_url": url,
-                    "product_id": product_id,
-                    "rating": r.get("Rating"),
-                    "review_text": r.get("ReviewText"),
-                    "title": r.get("Title"),
-                    "author": r.get("UserNickname"),
-                    "submission_time": r.get("SubmissionTime")
-                })
+        offset += PAGE_LIMIT
+        time.sleep(SLEEP_BETWEEN_REQUESTS)
 
-                product_review_count += 1
-                if product_review_count >= MAX_REVIEWS_PER_PRODUCT:
-                    break
-
-            offset += PAGE_LIMIT
-            time.sleep(SLEEP_BETWEEN_REQUESTS)
-
-        print(f"    ✅ Finished product with {product_review_count} reviews")
+    print(f"    ✅ Finished product with {product_review_count} reviews")
 
 print("\n🎉 SCRAPING COMPLETE")
 
