@@ -64,7 +64,7 @@ bestsellers = ["https://www.sephora.com/product/libre-berry-crush-P520837?skuId=
 # ---------------- HELPERS ---------------- #
 
 def extract_product_id(url):
-    """Extracts PXXXXX from Sephora URL"""
+    """Extracts P# from Sephora URL""" #product#
     match = re.search(r"(P\d+)", url)
     return match.group(1) if match else None
 
@@ -93,8 +93,8 @@ def fetch_reviews(product_id, offset):
 
 all_reviews = []
 
-for idx, url in enumerate(urls):
-    print(f"\n  ▶ Loading product {idx + 1}/{len(urls)}")
+for idx, url in enumerate(bestsellers):
+    print(f"\n  ▶ Loading product {idx + 1}/{len(bestsellers)}")
     print(f"    URL: {url}")
 
     product_id = extract_product_id(url)
@@ -139,4 +139,4 @@ print("\n🎉 SCRAPING COMPLETE")
 df = pd.DataFrame(all_reviews)
 df.to_csv("sephora_reviews.csv", index=False)
 
-print(f"💾 Saved {len(df)} total reviews to sephora_reviews.csv")
+print(f"💾 Saved {len(df)} total reviews to sephoraN_reviews.csv")

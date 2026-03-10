@@ -18,6 +18,4 @@ df = df.drop(columns=["category"]) #remove category column
 productsdf = df[['product_id', 'source_url']].drop_duplicates(subset='product_id') #make every unique product ID one entry 
 productsdf.to_csv("all_products.csv", index=False) #in a new csv all_products with columns product_id, source_url from the csv
 
-#add a brand column 
-#Scrape ingredients and about the product for each unique product
 
