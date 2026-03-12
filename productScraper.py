@@ -6,36 +6,12 @@ import requests
 import pandas as pd
 import time
 import re
-#from bs4 import BeautifulSoup
+import json
+from bs4 import BeautifulSoup
 
-# ---------------- CONFIG ---------------- #
-
-# MAX_REVIEWS_PER_PRODUCT = 500
-# PAGE_LIMIT = 100   # max allowed by BV is usually 100
-# SLEEP_BETWEEN_REQUESTS = 0.5
-
-# BAZAARVOICE_ENDPOINT = "https://api.bazaarvoice.com/data/reviews.json"
-
-# PASSKEY = "calXm2DyQVjcCy9agq85vmTJv5ELuuBCF2sdg4BnJzJus"
-
-# all_products = []
-
-# # ---------------- URL LISTS ---------------- #
-
-# bestsellers = ["https://www.sephora.com/product/libre-berry-crush-P520837?skuId=2919744&icid2=products%20grid:p520837:product",
-#                "https://www.sephora.com/product/kayali-yum-boujee-marshmallow-81-eau-de-parfum-intense-travel-spray-P512449?skuId=2804839&icid2=products%20grid:p512449:product",
-#                "https://www.sephora.com/product/kayali-vanilla-P439406?skuId=2163970&icid2=products%20grid:p439406:product",
-#                "https://www.sephora.com/product/phlur-vanilla-skin-hair-body-fragrance-mist-P509258?skuId=2693349&icid2=products%20grid:p509258:product",
-#                "https://www.sephora.com/product/eilish-1-eau-de-parfum-P520204?skuId=2948495&icid2=products%20grid:p520204:product",
-#                "https://www.sephora.com/product/libre-berry-crush-travel-spray-P520822?skuId=2919769&icid2=products%20grid:p520822:product",
-#                "https://www.sephora.com/product/paradoxe-eau-de-parfum-P501198?skuId=2591170&icid2=products%20grid:p501198:product",
-#                "https://www.sephora.com/product/donna-born-in-roma-purple-melancholia-P520824?skuId=2930154&icid2=products%20grid:p520824:product",
-#                "https://www.sephora.com/product/rare-eau-de-parfum-P517178?skuId=2888188&icid2=products%20grid:p517178:product",
-#                "https://www.sephora.com/product/good-girl-blush-eau-de-parfum-P504996?skuId=2645026&icid2=products%20grid:p504996:product",
-#                "https://www.sephora.com/product/glossier-glossier-you-eau-de-parfum-P504364?skuId=2649770&icid2=products%20grid:p504364:product"
-#                ] #9:20 PM EST Sephora womens frag
-
-# ---------------- MAIN SCRAPER CODE ---------------- #
+headers = {
+    "User-Agent": "Mozilla/5.0"
+}
 
 df = pd.read_csv("sephora_reviews.csv")
 #compress reviews to unique products by ID
@@ -51,105 +27,77 @@ productsdf = (
 
 brands = []
 ingredients = []
+descriptionF = []
 highlights = []
 fragrance_family = []
 scent_type = []
 key_notes = []
 
-for pid in productsdf["product_id"]:
+#notes:
+# api is only fetching comerce data
+#try this api for product data: https://www.sephora.com/api/catalog/products/{productId}
+#fix those fields and finish product scraper then move to analyzer for insights
 
-    #print(pid)
-    api_url = f"https://www.sephora.com/api/v3/users/profiles/current/product/{pid}"
-    #if want more info api_url = api_url = f"https://www.sephora.com/api/v3/users/profiles/current/product/{pid}?countryCode=US&loc=EN-US"
-    #api_url = f"https://www.sephora.com/api/catalog/products/{pid}"
-    # https://www.sephora.com/api/v3/users/profiles/current/product/P512856?skipAddToRecentlyViewed=false&preferedSku=2804821&countryCode=US&loc=EN-US&cb=1772772652
-    # api url from inspect network - fetch xmr - P512...?skipAddtorecentlyviewed
-    r = requests.get(api_url, headers={"User-Agent": "Mozilla/5.0"})
-    data = r.json()
-    print(data.keys())
-    # brand
-    brand = data.get("ancillarySkus", [{}])[0].get("brandName")
-    brands.append(brand)
-    #brands.append(data["ancillarySkus"][0]["brandName"])
-    #brands.append(data["brandName"]) #["displayName"]
+for source in productsdf["source_url"]:
 
-    #remaining info not through that api url find how to extract
-    # ingredients
-    ingredient = data.get("currentSku", [{}])[0].get("ingredientDesc")
-    ingredients.append(ingredient)
+    print("Scraping:", source)
 
-    # highlights
-    h = [x["displayName"] for x in data.get("highlights", [])]
-    highlights.append(", ".join(h))
+    product_json = None
 
-    # fragrance details
-    details = data.get("productDetails", {})
+    for script in soup.find_all("script"):
+        if '"page":{"product"' in script.text:
+            product_json = script.text
+            break
 
-    fragrance_family.append(details.get("fragranceFamily"))
-    scent_type.append(details.get("fragranceType"))
-    key_notes.append(details.get("keyNotes"))
+    if not product_json:
+        print("Product JSON not found:", source)
+        continue
 
-    time.sleep(0.3)
-#time buffer to finish prev task
-# brands = []
-# highlights_list = []
-# ingredients_list = []
+    start = product_json.find('{"page":{"product"')
+    end = product_json.rfind('}}}') + 3
 
-# about_cols = {
-#     "Fragrance Family": [],
-#     "Scent Type": [],
-#     "Key Notes": [],
-#     "Fragrance Description": [],
-#     "About the Bottle": [],
-#     "About the Fragrance": []
-# }
+    json_text = product_json[start:end]
 
-# for url in productsdf["source_url"]:
+    data = json.loads(json_text)
 
-#     response = requests.get(url, headers={"User-Agent":"Mozilla/5.0"})
-#     soup = BeautifulSoup(response.text, "html.parser")
+    product = data["page"]["product"]
 
-#     brand_tag = soup.find("a", {"data-at":"brand_name"})
-#     brand = brand_tag.text.strip() if brand_tag else None
-#     brands.append(brand)
+    # Brand
+    brands.append(product.get("brand", {}).get("displayName"))
 
-#     highlights = soup.select("div.css-fuws2b span.css-1d7qtkv, div.css-fuws2b span.css-1tihdel")
-#     highlight_values = [h.text.strip() for h in highlights]
-#     highlights_list.append(", ".join(highlight_values))
+    # Ingredients
+    ingredients.append(product.get("currentSku", {}).get("ingredientDesc"))
 
-#     about_section = soup.select_one("div.css-1c3otrr")
+    # Highlights
+    highlight = [h["displayName"] for h in product.get("highlights", [])]
+    highlights.append(", ".join(highlight))
 
-#     about_data = {}
+    # Fragrance info
+    fragrance_family.append(product.get("fragranceFamily"))
+    scent_type.append(product.get("fragranceType"))
+    key_notes.append(product.get("keyNotes"))
 
-#     if about_section:
-#         for b in about_section.find_all("b"):
-#             label = b.text.replace(":", "").strip()
-#             value = b.next_sibling.strip() if b.next_sibling else None
-#             about_data[label] = value
-#             for key in about_cols:
-#                 about_cols[key].append(about_data.get(key))
+    time.sleep(2)
 
-#     ingredients_tag = soup.select_one("#ingredients div.css-yg260s")
+    print("Done")
+    
 
-#     ingredients = ingredients_tag.text.strip() if ingredients_tag else None
-#     ingredients_list.append(ingredients)
+    # html = requests.get(source, headers=headers).text
+    # soup = BeautifulSoup(html, "html.parser")
 
-#     time.sleep(1)
+    # scripts = soup.find_all("script")
 
-# productsdf["brand"] = brands
-# productsdf["highlights"] = highlights_list
-# productsdf["ingredients"] = ingredients_list
+    # for script in scripts:
+    #     if "fragrance" in script.text.lower():
+    #         print(script.text[:1000])
 
-# for key in about_cols:
-#     productsdf[key] = about_cols[key]
+  
 
+    #time.sleep(0.3)
+
+#productsdf['Description'] = descriptionF
+#productsdf['Fragrance Family'] = fragrance_family
+#productsdf['Scent Type'] = scent_type
+#productsdf['Key Notes'] = key_notes
 
 productsdf.to_csv("product_info.csv", index=False) #in a new csv all_products with columns product_id, source_url from the csv
-
-
-# ---------------- EXPORT ---------------- #
-
-# df = pd.DataFrame(all_products)
-# df.to_csv("bestseller_info.csv", index=False)
-
-# print(f"💾 Saved bestseller info to bestseller_info.csv")
