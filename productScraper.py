@@ -41,6 +41,8 @@ key_notes = []
 for source in productsdf["source_url"]:
 
     print("Scraping:", source)
+    html = requests.get(source, headers=headers).text
+    oup = BeautifulSoup(html, "html.parser")
 
     product_json = None
 
