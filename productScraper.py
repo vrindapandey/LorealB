@@ -97,9 +97,11 @@ for source in productsdf["source_url"]:
 
     #time.sleep(0.3)
 
-#productsdf['Description'] = descriptionF
-#productsdf['Fragrance Family'] = fragrance_family
-#productsdf['Scent Type'] = scent_type
-#productsdf['Key Notes'] = key_notes
+productsdf['Brand'] = brands
+productsdf['Highlights'] = highlights
+productsdf['Fragrance Family'] = fragrance_family
+productsdf['Scent Type'] = scent_type
+productsdf['Key Notes'] = key_notes
+productsdf['Ingredients'] = ingredients
 
 productsdf.to_csv("product_info.csv", index=False) #in a new csv all_products with columns product_id, source_url from the csv
