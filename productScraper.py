@@ -79,29 +79,22 @@ for source in productsdf["source_url"]:
     scent_type.append(product.get("fragranceType"))
     key_notes.append(product.get("keyNotes"))
 
-    time.sleep(2)
+    time.sleep(3)
 
     print("Done")
     
 
-    # html = requests.get(source, headers=headers).text
-    # soup = BeautifulSoup(html, "html.parser")
-
-    # scripts = soup.find_all("script")
-
-    # for script in scripts:
-    #     if "fragrance" in script.text.lower():
-    #         print(script.text[:1000])
-
-  
-
-    #time.sleep(0.3)
-
 productsdf['Brand'] = brands
+print(brands)
 productsdf['Highlights'] = highlights
+print(highlights)
 productsdf['Fragrance Family'] = fragrance_family
+print(fragrance_family)
 productsdf['Scent Type'] = scent_type
+print(scent_type)
 productsdf['Key Notes'] = key_notes
+print(key_notes)
 productsdf['Ingredients'] = ingredients
+print(ingredients)
 
 productsdf.to_csv("product_info.csv", index=False) #in a new csv all_products with columns product_id, source_url from the csv
