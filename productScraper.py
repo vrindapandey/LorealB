@@ -79,11 +79,12 @@ for source in productsdf["source_url"]:
 
     # Ingredients
     ingredients.append(product.get("currentSku", {}).get("ingredientDesc"))
+    print(ingredients)
 
     # # Highlights
-    highlight_list = product.get("currentSku", {}).get("highlights")
-    highlight_names = [h.get("displayName") for h in highlight_list if "displayName" in h]
-    highlights.append(", ".join(highlight_names))
+    # highlight_list = product.get("currentSku", {}).get("highlights")
+    # highlight_names = [h.get("displayName") for h in highlight_list if "displayName" in h]
+    # highlights.append(", ".join(highlight_names))
 
     # highlight = [h["displayName"] for h in product.get("highlights", [])]
     # highlights.append(", ".join(highlight))
@@ -92,28 +93,45 @@ for source in productsdf["source_url"]:
     details = product.get("productDetails", {})
     short_desc = details.get("shortDescription", "")
 
-    desc_soup = BeautifulSoup(short_desc, "html.parser")
+    #desc_soup = BeautifulSoup(short_desc, "html.parser")
+    desc_text = BeautifulSoup(short_desc, "html.parser").get_text("\n")
 
     family = None
     scent = None
     notes = None
 
-    print(desc_soup)
+    for line in desc_text.split("\n"):
+        line = line.strip()
 
-    for p in desc_soup.find_all("p"):
-        strong = p.find("strong")
-        if not strong:
-            continue
+        if line.startswith("Fragrance Family"):
+            family = line.split(":",1)[1].strip()
 
-        label = strong.text.strip()
-        value = p.get_text().replace(strong.text, "").strip()
+        elif line.startswith("Scent Type"):
+            scent = line.split(":",1)[1].strip()
 
-        if "Fragrance Family" in label:
-            family = value
-        elif "Scent Type" in label:
-            scent = value
-        elif "Key Notes" in label:
-            notes = value
+        elif line.startswith("Key Notes"):
+            notes = line.split(":",1)[1].strip()
+
+    # family = None
+    # scent = None
+    # notes = None
+
+    # print(desc_soup)
+
+    # for p in desc_soup.find_all("p"):
+    #     strong = p.find("strong")
+    #     if not strong:
+    #         continue
+
+    #     label = strong.text.strip()
+    #     value = p.get_text().replace(strong.text, "").strip()
+
+    #     if "Fragrance Family" in label:
+    #         family = value
+    #     elif "Scent Type" in label:
+    #         scent = value
+    #     elif "Key Notes" in label:
+    #         notes = value
 
     fragrance_family.append(family)
     scent_type.append(scent)
