@@ -90,29 +90,44 @@ for source in productsdf["source_url"]:
     # highlights.append(", ".join(highlight))
 
     # Fragrance info - within shortDescription
+    # details = product.get("productDetails", {})
+    # short_desc = details.get("shortDescription", "")
+
+    # #desc_soup = BeautifulSoup(short_desc, "html.parser")
+    # desc_text = BeautifulSoup(short_desc, "html.parser").get_text("\n")
+
+    # family = None
+    # scent = None
+    # notes = None
+
+    # print(short_desc)
+
+    # for line in desc_text.split("\n"):
+    #     line = line.strip()
+
+    #     if line.startswith("Fragrance Family"):
+    #         family = line.split(":",1)[1].strip()
+
+    #     elif line.startswith("Scent Type"):
+    #         scent = line.split(":",1)[1].strip()
+
+    #     elif line.startswith("Key Notes"):
+    #         notes = line.split(":",1)[1].strip()
+
     details = product.get("productDetails", {})
     short_desc = details.get("shortDescription", "")
 
-    #desc_soup = BeautifulSoup(short_desc, "html.parser")
-    desc_text = BeautifulSoup(short_desc, "html.parser").get_text("\n")
+    family_match = re.search(r"Fragrance Family:\s*</?(?:b|strong)?[^>]*>\s*([^<]+)", short_desc)
+    scent_match = re.search(r"Scent Type:\s*</?(?:b|strong)?[^>]*>\s*([^<]+)", short_desc)
+    notes_match = re.search(r"Key Notes:\s*</?(?:b|strong)?[^>]*>\s*([^<]+)", short_desc)
 
-    family = None
-    scent = None
-    notes = None
+    family = family_match.group(1).strip() if family_match else None
+    scent = scent_match.group(1).strip() if scent_match else None
+    notes = notes_match.group(1).strip() if notes_match else None
 
-    print(short_desc)
-
-    for line in desc_text.split("\n"):
-        line = line.strip()
-
-        if line.startswith("Fragrance Family"):
-            family = line.split(":",1)[1].strip()
-
-        elif line.startswith("Scent Type"):
-            scent = line.split(":",1)[1].strip()
-
-        elif line.startswith("Key Notes"):
-            notes = line.split(":",1)[1].strip()
+    fragrance_family.append(family)
+    scent_type.append(scent)
+    key_notes.append(notes)
 
     # family = None
     # scent = None
