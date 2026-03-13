@@ -81,8 +81,9 @@ for source in productsdf["source_url"]:
     ingredients.append(product.get("currentSku", {}).get("ingredientDesc"))
     
 
-    # # Highlights
-    # highlight_list = product.get("currentSku", {}).get("highlights")
+    # Highlights
+    highlight_list = product.get("currentSku", {}).get("highlights")
+    print(highlight_list)
     # highlight_names = [h.get("displayName") for h in highlight_list if "displayName" in h]
     # highlights.append(", ".join(highlight_names))
 
@@ -90,30 +91,6 @@ for source in productsdf["source_url"]:
     # highlights.append(", ".join(highlight))
 
     # Fragrance info - within shortDescription
-    # details = product.get("productDetails", {})
-    # short_desc = details.get("shortDescription", "")
-
-    # #desc_soup = BeautifulSoup(short_desc, "html.parser")
-    # desc_text = BeautifulSoup(short_desc, "html.parser").get_text("\n")
-
-    # family = None
-    # scent = None
-    # notes = None
-
-    # print(short_desc)
-
-    # for line in desc_text.split("\n"):
-    #     line = line.strip()
-
-    #     if line.startswith("Fragrance Family"):
-    #         family = line.split(":",1)[1].strip()
-
-    #     elif line.startswith("Scent Type"):
-    #         scent = line.split(":",1)[1].strip()
-
-    #     elif line.startswith("Key Notes"):
-    #         notes = line.split(":",1)[1].strip()
-
     details = product.get("productDetails", {})
     short_desc = details.get("shortDescription", "")
 
