@@ -66,11 +66,10 @@ for source in productsdf["source_url"]:
 
     #print(product.keys())
     #print(product["currentSku"].keys())
-    print(product["productDetails"].keys())
+    #print(product["productDetails"].keys())
     print(product.get("productDetails",{}).get("brand"))
-    print(product.get("productDetails",{}).get("longDescription"))
+    #print(product.get("productDetails",{}).get("longDescription"))
     print(product.get("productDetails",{}).get("shortDescription"))
-    print(product.get("productDetails",{}).get("suggestedUsage"))
     #print(json.dumps(product, indent=2)[:1000])
 
     # Brand
@@ -94,7 +93,7 @@ for source in productsdf["source_url"]:
     
 
 #productsdf['Brand'] = brands
-print(brands) #nones
+#print(brands) #nones
 # productsdf['Highlights'] = highlights
 # print(highlights) #quotes
 # productsdf['Fragrance Family'] = fragrance_family
