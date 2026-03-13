@@ -83,7 +83,9 @@ for source in productsdf["source_url"]:
 
     # Highlights
     highlight_list = product.get("currentSku", {}).get("highlights")
-    print(highlight_list)
+    highlight_texts = [h.get("altText") for h in highlight_list]
+    highlights.append(", ".join(highlight_texts))
+    #print(highlight_list)
     # highlight_names = [h.get("displayName") for h in highlight_list if "displayName" in h]
     # highlights.append(", ".join(highlight_names))
 
@@ -138,7 +140,7 @@ for source in productsdf["source_url"]:
 
 productsdf['Brand'] = brands
 #print(brands) #nones
-#productsdf['Highlights'] = highlights
+productsdf['Highlights'] = highlights
 # print(highlights) #quotes
 productsdf['Fragrance Family'] = fragrance_family
 # print(fragrance_family) #nones
