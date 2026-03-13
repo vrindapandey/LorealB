@@ -1,20 +1,22 @@
-#imports
-#activat venv
+import subprocess
+import sys
 
-#call scraper
-#insert wait time or complete then
-#call product scraper
-#
+scripts = [
+    "Scraper.py",
+    "dataCleaner.py",
+    "productScraper.py",
+    "analyzer.py"
+]
 
-#scraper
-#when it prints complete message
+for script in scripts:
+    print(f"\nRunning {script}...\n")
 
+    result = subprocess.run([sys.executable, script])
 
-#data cleaner
-#when it prints complete message
+    if result.returncode != 0:
+        print(f"{script} failed. Stopping pipeline.")
+        sys.exit(1)
 
-#productScraper
-#when it prints complete
+    print(f"{script} complete.\n")
 
-#analyser
-#now you have your insights
+print("Process completed successfully.")

@@ -1,7 +1,3 @@
-
-#put a brand column
-#Scrape ingredients and about the product for each unique product
-
 import requests
 import pandas as pd
 import time
@@ -80,17 +76,11 @@ for source in productsdf["source_url"]:
     # Ingredients
     ingredients.append(product.get("currentSku", {}).get("ingredientDesc"))
     
-
     # Highlights
     highlight_list = product.get("currentSku", {}).get("highlights")
     highlight_texts = [h.get("altText") for h in highlight_list]
     highlights.append(", ".join(highlight_texts))
     #print(highlight_list)
-    # highlight_names = [h.get("displayName") for h in highlight_list if "displayName" in h]
-    # highlights.append(", ".join(highlight_names))
-
-    # highlight = [h["displayName"] for h in product.get("highlights", [])]
-    # highlights.append(", ".join(highlight))
 
     # Fragrance info - within shortDescription
     details = product.get("productDetails", {})
@@ -107,31 +97,6 @@ for source in productsdf["source_url"]:
     fragrance_family.append(family)
     scent_type.append(scent)
     key_notes.append(notes)
-
-    # family = None
-    # scent = None
-    # notes = None
-
-    # print(desc_soup)
-
-    # for p in desc_soup.find_all("p"):
-    #     strong = p.find("strong")
-    #     if not strong:
-    #         continue
-
-    #     label = strong.text.strip()
-    #     value = p.get_text().replace(strong.text, "").strip()
-
-    #     if "Fragrance Family" in label:
-    #         family = value
-    #     elif "Scent Type" in label:
-    #         scent = value
-    #     elif "Key Notes" in label:
-    #         notes = value
-
-    # fragrance_family.append(product.get("currentSku", {}).get("ingredientDesc"))
-    # scent_type.append(product.get("currentSku", {}).get("ingredientDesc"))
-    # key_notes.append(product.get("currentSku", {}).get("ingredientDesc"))
 
     time.sleep(2)
 

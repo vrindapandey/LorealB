@@ -43,7 +43,6 @@ bestsellers = ["https://www.sephora.com/product/libre-berry-crush-P520837?skuId=
 #     "toprated": toprated
 # }
 
-
 def extract_product_id(url):
     """Extracts P# from Sephora URL""" #product#
     match = re.search(r"(P\d+)", url)
