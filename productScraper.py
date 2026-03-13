@@ -64,37 +64,41 @@ for source in productsdf["source_url"]:
 
     product = data["page"]["product"]
 
-    # Brand
-    brands.append(product.get("brand", {}).get("displayName"))
+    #print(product.keys())
+    print(product["currentSku"].keys())
+    #print(json.dumps(product, indent=2)[:1000])
 
-    # Ingredients
-    ingredients.append(product.get("currentSku", {}).get("ingredientDesc"))
+    # # Brand
+    # brands.append(product.get("brand", {}).get("displayName"))
 
-    # Highlights
-    highlight = [h["displayName"] for h in product.get("highlights", [])]
-    highlights.append(", ".join(highlight))
+    # # Ingredients
+    # ingredients.append(product.get("currentSku", {}).get("ingredientDesc"))
 
-    # Fragrance info
-    fragrance_family.append(product.get("fragranceFamily"))
-    scent_type.append(product.get("fragranceType"))
-    key_notes.append(product.get("keyNotes"))
+    # # Highlights
+    # highlight = [h["displayName"] for h in product.get("highlights", [])]
+    # highlights.append(", ".join(highlight))
+
+    # # Fragrance info
+    # fragrance_family.append(product.get("fragranceFamily"))
+    # scent_type.append(product.get("fragranceType"))
+    # key_notes.append(product.get("keyNotes"))
 
     time.sleep(3)
 
     print("Done")
     
 
-productsdf['Brand'] = brands
-print(brands)
-productsdf['Highlights'] = highlights
-print(highlights)
-productsdf['Fragrance Family'] = fragrance_family
-print(fragrance_family)
-productsdf['Scent Type'] = scent_type
-print(scent_type)
-productsdf['Key Notes'] = key_notes
-print(key_notes)
-productsdf['Ingredients'] = ingredients
-print(ingredients)
+# productsdf['Brand'] = brands
+# print(brands) #nones
+# productsdf['Highlights'] = highlights
+# print(highlights) #quotes
+# productsdf['Fragrance Family'] = fragrance_family
+# print(fragrance_family) #nones
+# productsdf['Scent Type'] = scent_type
+# print(scent_type) #nones
+# productsdf['Key Notes'] = key_notes
+# print(key_notes) #nones
+# productsdf['Ingredients'] = ingredients
+# print(ingredients)
 
 productsdf.to_csv("product_info.csv", index=False) #in a new csv all_products with columns product_id, source_url from the csv
