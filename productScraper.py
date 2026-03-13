@@ -147,7 +147,7 @@ for source in productsdf["source_url"]:
 
 productsdf['Brand'] = brands
 #print(brands) #nones
-productsdf['Highlights'] = highlights
+#productsdf['Highlights'] = highlights
 # print(highlights) #quotes
 productsdf['Fragrance Family'] = fragrance_family
 # print(fragrance_family) #nones
