@@ -79,7 +79,7 @@ for source in productsdf["source_url"]:
 
     # Ingredients
     ingredients.append(product.get("currentSku", {}).get("ingredientDesc"))
-    print(ingredients)
+    
 
     # # Highlights
     # highlight_list = product.get("currentSku", {}).get("highlights")
@@ -99,6 +99,8 @@ for source in productsdf["source_url"]:
     family = None
     scent = None
     notes = None
+
+    print(short_desc)
 
     for line in desc_text.split("\n"):
         line = line.strip()
