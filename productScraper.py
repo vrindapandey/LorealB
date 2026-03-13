@@ -90,7 +90,6 @@ for source in productsdf["source_url"]:
 
     # Fragrance info - within shortDescription
     details = product.get("productDetails", {})
-    print(details)
     short_desc = details.get("shortDescription", "")
 
     desc_soup = BeautifulSoup(short_desc, "html.parser")
