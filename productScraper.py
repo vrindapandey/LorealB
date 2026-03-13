@@ -90,6 +90,7 @@ for source in productsdf["source_url"]:
 
     # Fragrance info - within shortDescription
     details = product.get("productDetails", {})
+    print(details)
     short_desc = details.get("shortDescription", "")
 
     desc_soup = BeautifulSoup(short_desc, "html.parser")
@@ -97,6 +98,8 @@ for source in productsdf["source_url"]:
     family = None
     scent = None
     notes = None
+
+    print(desc_soup)
 
     for p in desc_soup.find_all("p"):
         strong = p.find("strong")
@@ -127,7 +130,7 @@ for source in productsdf["source_url"]:
 
 productsdf['Brand'] = brands
 #print(brands) #nones
-#productsdf['Highlights'] = highlights
+productsdf['Highlights'] = highlights
 # print(highlights) #quotes
 productsdf['Fragrance Family'] = fragrance_family
 # print(fragrance_family) #nones
