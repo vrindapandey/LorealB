@@ -67,6 +67,10 @@ for source in productsdf["source_url"]:
     #print(product.keys())
     #print(product["currentSku"].keys())
     print(product["productDetails"].keys())
+    print(product.get("productDetails",{}).get("brand"))
+    print(product.get("productDetails",{}).get("longDescription"))
+    print(product.get("productDetails",{}).get("shortDescription"))
+    print(product.get("productDetails",{}).get("suggestedUsage"))
     #print(json.dumps(product, indent=2)[:1000])
 
     # Brand
@@ -89,8 +93,8 @@ for source in productsdf["source_url"]:
     print("Done")
     
 
-# productsdf['Brand'] = brands
-# print(brands) #nones
+#productsdf['Brand'] = brands
+print(brands) #nones
 # productsdf['Highlights'] = highlights
 # print(highlights) #quotes
 # productsdf['Fragrance Family'] = fragrance_family
@@ -99,7 +103,7 @@ for source in productsdf["source_url"]:
 # print(scent_type) #nones
 # productsdf['Key Notes'] = key_notes
 # print(key_notes) #nones
-# productsdf['Ingredients'] = ingredients
+#productsdf['Ingredients'] = ingredients
 # print(ingredients)
 
 productsdf.to_csv("product_info.csv", index=False) #in a new csv all_products with columns product_id, source_url from the csv
