@@ -65,23 +65,24 @@ for source in productsdf["source_url"]:
     product = data["page"]["product"]
 
     #print(product.keys())
-    print(product["currentSku"].keys())
+    #print(product["currentSku"].keys())
+    print(product["productDetails"].keys())
     #print(json.dumps(product, indent=2)[:1000])
 
-    # # Brand
-    # brands.append(product.get("brand", {}).get("displayName"))
+    # Brand
+    brands.append(product.get("currentSku", {}).get("brandName"))
 
-    # # Ingredients
-    # ingredients.append(product.get("currentSku", {}).get("ingredientDesc"))
+    # Ingredients
+    ingredients.append(product.get("currentSku", {}).get("ingredientDesc"))
 
     # # Highlights
     # highlight = [h["displayName"] for h in product.get("highlights", [])]
     # highlights.append(", ".join(highlight))
 
-    # # Fragrance info
-    # fragrance_family.append(product.get("fragranceFamily"))
-    # scent_type.append(product.get("fragranceType"))
-    # key_notes.append(product.get("keyNotes"))
+    # Fragrance info
+    # fragrance_family.append(product.get("currentSku", {}).get("ingredientDesc"))
+    # scent_type.append(product.get("currentSku", {}).get("ingredientDesc"))
+    # key_notes.append(product.get("currentSku", {}).get("ingredientDesc"))
 
     time.sleep(3)
 
