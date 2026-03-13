@@ -150,9 +150,6 @@ for source in productsdf["source_url"]:
     #     elif "Key Notes" in label:
     #         notes = value
 
-    fragrance_family.append(family)
-    scent_type.append(scent)
-    key_notes.append(notes)
     # fragrance_family.append(product.get("currentSku", {}).get("ingredientDesc"))
     # scent_type.append(product.get("currentSku", {}).get("ingredientDesc"))
     # key_notes.append(product.get("currentSku", {}).get("ingredientDesc"))
