@@ -1,25 +1,8 @@
-
-#scrape from 0-10 of the bestseller and toprated sephora womens perfumes
-
-#needed functionality:
-#load reviews from bestsellers url list bestsellers[x]
-#append reviews
-#continue loading and appending reviews till reaches 500 reviews for the product
-#give some kind of success completion message for that product (url)
-#load reviews from toprated list url list toprated[x]
-#append reviews
-#continue loading and appending reviews till reaches 500 reviews for the product
-#append all reviews with category (list name) and their respective source urls (list name[x ])
-#some kind of success message for completion of that product url
-#increment x annd continue going through 
-#convert all reviews to csv
-
 import requests
 import pandas as pd
 import time
 import re
 
-# ---------------- CONFIG ---------------- #
 
 MAX_REVIEWS_PER_PRODUCT = 500
 PAGE_LIMIT = 100   # max allowed by BV is usually 100
@@ -29,7 +12,6 @@ BAZAARVOICE_ENDPOINT = "https://api.bazaarvoice.com/data/reviews.json"
 
 PASSKEY = "calXm2DyQVjcCy9agq85vmTJv5ELuuBCF2sdg4BnJzJus"
 
-# ---------------- URL LISTS ---------------- #
 
 bestsellers = ["https://www.sephora.com/product/libre-berry-crush-P520837?skuId=2919744&icid2=products%20grid:p520837:product",
                "https://www.sephora.com/product/kayali-yum-boujee-marshmallow-81-eau-de-parfum-intense-travel-spray-P512449?skuId=2804839&icid2=products%20grid:p512449:product",
@@ -42,7 +24,7 @@ bestsellers = ["https://www.sephora.com/product/libre-berry-crush-P520837?skuId=
                "https://www.sephora.com/product/rare-eau-de-parfum-P517178?skuId=2888188&icid2=products%20grid:p517178:product",
                "https://www.sephora.com/product/good-girl-blush-eau-de-parfum-P504996?skuId=2645026&icid2=products%20grid:p504996:product",
                "https://www.sephora.com/product/glossier-glossier-you-eau-de-parfum-P504364?skuId=2649770&icid2=products%20grid:p504364:product"
-               ] #9:20 PM EST Sephora womens frag
+               ] #9:20 PM EST Sephora womens frag 2/24/2026
 # toprated = ["https://www.sephora.com/product/light-blue-eau-de-toilette-travel-spray-P516185?skuId=2863355&icid2=products%20grid:p516185:product",
 #             "https://www.sephora.com/product/indecent-cherry-eau-de-parfum-P520182?skuId=2948586&icid2=products%20grid:p520182:product",
 #             "https://www.sephora.com/product/mini-l-imperatrice-eau-de-toilette-set-P517211?skuId=2863488&icid2=products%20grid:p517211:product",
@@ -61,7 +43,6 @@ bestsellers = ["https://www.sephora.com/product/libre-berry-crush-P520837?skuId=
 #     "toprated": toprated
 # }
 
-# ---------------- HELPERS ---------------- #
 
 def extract_product_id(url):
     """Extracts P# from Sephora URL""" #product#
@@ -86,8 +67,6 @@ def fetch_reviews(product_id, offset):
     response.raise_for_status()
     return response.json()
 
-
-# ---------------- MAIN SCRAPER ---------------- #
 
 #add product level to original scraper or change logic structure to just scrape about info
 

@@ -27,16 +27,18 @@ productsdf = (
 
 brands = []
 ingredients = []
-descriptionF = []
 highlights = []
 fragrance_family = []
 scent_type = []
 key_notes = []
 
+#long description
+#aboutFragrance
+#aboutBottle
+
 #notes:
 # api is only fetching comerce data
 #try this api for product data: https://www.sephora.com/api/catalog/products/{productId}
-#fix those fields and finish product scraper then move to analyzer for insights
 
 for source in productsdf["source_url"]:
 
@@ -64,12 +66,12 @@ for source in productsdf["source_url"]:
 
     product = data["page"]["product"]
 
+    #debugging
     #print(product.keys())
     #print(product["currentSku"].keys())
     #print(product["productDetails"].keys())
-    print(product.get("productDetails",{}).get("brand"))
-    #print(product.get("productDetails",{}).get("longDescription"))
-    print(product.get("productDetails",{}).get("shortDescription"))
+    #print(product.get("productDetails",{}).get("brand"))
+    #print(product.get("productDetails",{}).get("shortDescription"))
     #print(json.dumps(product, indent=2)[:1000])
 
     # Brand
@@ -79,30 +81,61 @@ for source in productsdf["source_url"]:
     ingredients.append(product.get("currentSku", {}).get("ingredientDesc"))
 
     # # Highlights
+    highlight_list = product.get("currentSku", {}).get("highlights")
+    highlight_names = [h.get("displayName") for h in highlight_list if "displayName" in h]
+    highlights.append(", ".join(highlight_names))
+
     # highlight = [h["displayName"] for h in product.get("highlights", [])]
     # highlights.append(", ".join(highlight))
 
-    # Fragrance info
+    # Fragrance info - within shortDescription
+    details = product.get("productDetails", {})
+    short_desc = details.get("shortDescription", "")
+
+    desc_soup = BeautifulSoup(short_desc, "html.parser")
+
+    family = None
+    scent = None
+    notes = None
+
+    for p in desc_soup.find_all("p"):
+        strong = p.find("strong")
+        if not strong:
+            continue
+
+        label = strong.text.strip()
+        value = p.get_text().replace(strong.text, "").strip()
+
+        if "Fragrance Family" in label:
+            family = value
+        elif "Scent Type" in label:
+            scent = value
+        elif "Key Notes" in label:
+            notes = value
+
+    fragrance_family.append(family)
+    scent_type.append(scent)
+    key_notes.append(notes)
     # fragrance_family.append(product.get("currentSku", {}).get("ingredientDesc"))
     # scent_type.append(product.get("currentSku", {}).get("ingredientDesc"))
     # key_notes.append(product.get("currentSku", {}).get("ingredientDesc"))
 
-    time.sleep(3)
+    time.sleep(2)
 
     print("Done")
     
 
-#productsdf['Brand'] = brands
+productsdf['Brand'] = brands
 #print(brands) #nones
-# productsdf['Highlights'] = highlights
+#productsdf['Highlights'] = highlights
 # print(highlights) #quotes
-# productsdf['Fragrance Family'] = fragrance_family
+productsdf['Fragrance Family'] = fragrance_family
 # print(fragrance_family) #nones
-# productsdf['Scent Type'] = scent_type
+productsdf['Scent Type'] = scent_type
 # print(scent_type) #nones
-# productsdf['Key Notes'] = key_notes
+productsdf['Key Notes'] = key_notes
 # print(key_notes) #nones
-#productsdf['Ingredients'] = ingredients
+productsdf['Ingredients'] = ingredients
 # print(ingredients)
 
 productsdf.to_csv("product_info.csv", index=False) #in a new csv all_products with columns product_id, source_url from the csv
